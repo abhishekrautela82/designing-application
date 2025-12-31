@@ -3,6 +3,7 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { PrismaClient } from "@prisma/client";
 import { Worker } from "bullmq";
 import { loadEnv } from "./env.js";
+import { renderPlaceholderPng } from "./render.js";
 
 const env = loadEnv();
 const prisma = new PrismaClient();
@@ -13,22 +14,6 @@ const s3 = new S3Client({
   credentials: { accessKeyId: env.S3_ACCESS_KEY, secretAccessKey: env.S3_SECRET_KEY },
   forcePathStyle: env.S3_FORCE_PATH_STYLE
 });
-
-function makePpmImage(params: { width: number; height: number; label: string }): Buffer {
-  // Very small portable pixmap for a deterministic "render" artifact.
-  const { width, height, label } = params;
-  const header = `P3\n# ${label}\n${width} ${height}\n255\n`;
-  const pixels: string[] = [];
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const r = Math.floor((x / Math.max(1, width - 1)) * 255);
-      const g = Math.floor((y / Math.max(1, height - 1)) * 255);
-      const b = 64;
-      pixels.push(`${r} ${g} ${b}`);
-    }
-  }
-  return Buffer.from(header + pixels.join("\n") + "\n", "utf8");
-}
 
 const connection = { url: env.REDIS_URL };
 
@@ -65,16 +50,16 @@ new Worker(
 
     await prisma.exportJob.update({ where: { id: exportJob.id }, data: { status: "running", progress: 0.1 } });
 
-    // Placeholder server-side render: write an artifact to S3/MinIO.
-    const artifact = makePpmImage({ width: 256, height: 144, label: `export-${exportJob.id}` });
-    const key = `${exportJob.projectId}/exports/${exportJob.id}/${Date.now()}.ppm`;
+    // Placeholder server-side render: write a PNG artifact to S3/MinIO.
+    const artifact = await renderPlaceholderPng({ width: 1280, height: 720, seed: exportJob.id });
+    const key = `${exportJob.projectId}/exports/${exportJob.id}/${Date.now()}.png`;
 
     await s3.send(
       new PutObjectCommand({
         Bucket: env.S3_BUCKET,
         Key: key,
         Body: artifact,
-        ContentType: "image/x-portable-pixmap"
+        ContentType: "image/png"
       })
     );
 

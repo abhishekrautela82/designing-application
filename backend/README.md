@@ -26,3 +26,5 @@ If you don’t send a Bearer token, the server issues an `x-dev-token` response 
 - Create an export job: `POST /api/v1/projects/{projectId}/exports`
 - Poll status: `GET /api/v1/projects/{projectId}/exports/{exportId}`
 - Get signed download URLs: `GET /api/v1/projects/{projectId}/exports/{exportId}?signed=1`
+
+Current placeholder renderer output is a PNG uploaded to S3/MinIO.
