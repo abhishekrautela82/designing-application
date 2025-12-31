@@ -21,6 +21,14 @@ To start the backend stack (recommended):
 
 If Docker isn’t installed yet, install Docker Desktop and re-run.
 
+### No-Docker demo backend
+If you only want to review the UI flow (projects list/create) without Docker:
+- `cd backend`
+- `npm.cmd install --ignore-scripts`
+- `npm.cmd run dev:demo`
+
+Then run the frontend as normal and click "Connect + Load Projects".
+
 ## Auth
 - The backend issues an `x-dev-token` header for dev convenience.
 - The UI stores it in localStorage and sends it as `Authorization: Bearer <token>`.
