@@ -19,6 +19,16 @@ Starter repository.
 Notes:
 - The backend uses server-side export jobs from day 1. The `worker` service processes queued `Scene` and `ExportJob` rows.
 
+## Development (frontend review UI)
+- Install deps:
+	- `cd frontend`
+	- `npm install`
+- Run:
+	- `npm run dev`
+- Open: `http://localhost:5173`
+
+If PowerShell blocks `npm` scripts on your machine, use `npm.cmd` instead.
+
 ## Getting started
 - Add your app source under `src/`.
 - Document how to run/build in this README.

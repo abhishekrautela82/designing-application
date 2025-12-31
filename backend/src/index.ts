@@ -19,7 +19,10 @@ const app = Fastify({
   }
 });
 
-await app.register(cors, { origin: true });
+await app.register(cors, {
+  origin: true,
+  exposedHeaders: ["x-dev-token"]
+});
 await app.register(jwt, { secret: env.JWT_SECRET });
 
 await app.register(swagger, {
