@@ -1,6 +1,32 @@
-# Designing application
+# Interior & Exterior Design Studio
 
-Starter repository.
+Professional interior and exterior design application with photo-editing, 3D scene building, and server-side export capabilities.
+
+## Quick start (Windows)
+
+### Demo mode (no Docker) - Recommended for development
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup\run-demo.ps1
+```
+
+Then open **http://127.0.0.1:5173/** in your browser.
+
+The desktop UI provides:
+- **Projects**: Create and manage interior/exterior design projects
+- **Captures**: Upload photos of spaces
+- **Editor**: Apply materials, place objects, adjust lighting
+- **Versions**: Save and compare design iterations
+- **Snippets**: Save viewpoint snapshots with lighting presets
+- **Exports**: Server-side high-quality rendering (PNG exports with signed download URLs)
+
+### Full stack (Docker) - For complete features
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup\run-full.ps1
+```
+
+Requires Docker Desktop. Runs Postgres + Redis + MinIO + API + worker for real uploads and processing.
+
+See [setup/README.md](setup/README.md) for details.
 
 ## Product design docs
 - [docs/PRD.md](docs/PRD.md)

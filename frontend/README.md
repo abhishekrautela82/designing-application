@@ -1,23 +1,42 @@
-# Frontend (Local Review UI)
+# Desktop Development UI
 
-This is a lightweight web UI to review the backend in action.
+This is the **desktop web application** for developing and testing the Interior & Exterior Design Studio.
+
+## Features
+
+- **Projects**: Create and manage interior/exterior design projects
+- **Captures**: Upload photos of spaces
+- **Editor**: Apply materials, place objects, adjust lighting (surfaces/objects/lighting/refine modes)
+- **Versions**: Save and compare design iterations
+- **Snippets**: Save viewpoint snapshots with lighting presets
+- **Exports**: Server-side high-quality rendering with signed download URLs
+
+## Architecture
+
+- **`api-client.ts`**: Type-safe API client for all backend endpoints
+- **`DesignApp.tsx`**: Main app with navigation
+- **`screens/`**: ProjectsScreen, ProjectDetailScreen, EditorScreen
+- **`design-app.css`**: Professional styling
 
 ## Run
-Prereqs:
-- Node.js 20+
 
-From `frontend/`:
-- `npm.cmd install`
-- `npm.cmd run dev`
+From repo root:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup\run-demo.ps1
+```
 
-Open:
-- `http://127.0.0.1:5173`
+Opens:
+- Frontend: http://127.0.0.1:5173/
+- Backend: http://127.0.0.1:8080/health
 
-## Backend
-The dev server proxies API calls to `http://localhost:8080`.
+The demo backend provides in-memory storage and simulated endpoints (no Docker required).
 
-To start the backend stack (recommended):
-- `docker compose up -d --build`
+For full features (real uploads/exports), run:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup\run-full.ps1
+```
+
+(Requires Docker Desktop)
 
 If Docker isn’t installed yet, install Docker Desktop and re-run.
 
