@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProjectType {
+  interior
+  exterior
+}
+
+enum JobStatus {
+  queued
+  running
+  succeeded
+  failed
+}
+
+enum ExportType {
+  before_after
+  snippets
+}
+
+enum ExportQuality {
+  standard
+  high
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  phone     String?  @unique
+  createdAt DateTime @default(now())
+
+  projects Project[]
+}
+
+model Project {
+  id        String      @id @default(cuid())
+  userId    String
+  name      String
+  type      ProjectType
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id])
+  captures Capture[]
+  scenes   Scene[]
+  versions DesignVersion[]
+  snippets Snippet[]
+  exports  ExportJob[]
+}
+
+model Capture {
+  id        String   @id @default(cuid())
+  projectId String
+  createdAt DateTime @default(now())
+
+  originalUrls String[]
+  metadata     Json?
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model Scene {
+  id        String    @id @default(cuid())
+  projectId String
+  createdAt DateTime  @default(now())
+
+  status   JobStatus  @default(queued)
+  progress Float      @default(0)
+  error    String?
+
+  artifacts Json?
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model DesignVersion {
+  id        String   @id @default(cuid())
+  projectId String
+  createdAt DateTime @default(now())
+
+  baseVersionId String?
+  operations    Json
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model Snippet {
+  id        String   @id @default(cuid())
+  projectId String
+  versionId String
+  createdAt DateTime @default(now())
+
+  label            String?
+  lightingPresetId String
+  camera           Json
+
+  project Project       @relation(fields: [projectId], references: [id])
+  version DesignVersion @relation(fields: [versionId], references: [id])
+}
+
+model ExportJob {
+  id        String       @id @default(cuid())
+  projectId String
+  versionId String
+  createdAt DateTime     @default(now())
+
+  type    ExportType
+  quality ExportQuality
+  snippetIds String[]
+
+  status   JobStatus @default(queued)
+  progress Float     @default(0)
+  error    String?
+
+  resultUrls String[]
+
+  project Project       @relation(fields: [projectId], references: [id])
+  version DesignVersion @relation(fields: [versionId], references: [id])
+}
