@@ -1,0 +1,40 @@
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Env / secrets
+.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Java / Kotlin
+*.class
+.gradle/
+
+# .NET
+bin/
+obj/
+
+# Build outputs (common)
+dist/
+build/
+out/
