@@ -4,9 +4,9 @@ Thumbs.db
 Desktop.ini
 
 # Editors
-.vscode/
-!.vscode/extensions.json
+.vscode/*
 !.vscode/settings.json
+!.vscode/extensions.json
 !.vscode/tasks.json
 !.vscode/launch.json
 
