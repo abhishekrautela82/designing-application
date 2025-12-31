@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
+import type { Queues } from "./queue.js";
 
 export type Jobs = {
   enqueueSceneBuild(input: { sceneId: string }): Promise<void>;
@@ -12,8 +13,9 @@ export type JobHandlers = {
 
 export function createInProcessJobs(params: {
   prisma: PrismaClient;
+  queues: Queues;
 }): { jobs: Jobs; handlers: JobHandlers } {
-  const { prisma } = params;
+  const { prisma, queues } = params;
 
   const handlers: JobHandlers = {
     async handleSceneBuild({ sceneId }) {
@@ -54,12 +56,16 @@ export function createInProcessJobs(params: {
   // Minimal queue: run in-process. We add a separate worker service next.
   const jobs: Jobs = {
     async enqueueSceneBuild(input) {
-      // DB-first enqueue: worker polls for queued jobs.
-      // Nothing to do here besides ensuring the row is queued (done by caller).
-      void input;
+      await queues.scene.add("scene-build", input, {
+        removeOnComplete: { count: 1000 },
+        removeOnFail: { count: 1000 }
+      });
     },
     async enqueueExport(input) {
-      void input;
+      await queues.export.add("export", input, {
+        removeOnComplete: { count: 1000 },
+        removeOnFail: { count: 1000 }
+      });
     }
   };
 

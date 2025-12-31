@@ -6,6 +6,7 @@ const schema = z.object({
   LOG_LEVEL: z.string().default("info"),
   JWT_SECRET: z.string().min(16),
   DATABASE_URL: z.string().min(1),
+  REDIS_URL: z.string().min(1).default("redis://localhost:6379"),
   S3_ENDPOINT: z.string().url(),
   S3_REGION: z.string().min(1),
   S3_ACCESS_KEY: z.string().min(1),

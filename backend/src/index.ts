@@ -1,3 +1,4 @@
+import "dotenv/config";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
@@ -8,6 +9,7 @@ import { loadEnv } from "./env.js";
 import { createS3 } from "./s3.js";
 import { registerRoutes } from "./routes.js";
 import { createInProcessJobs } from "./jobs.js";
+import { createQueues } from "./queue.js";
 
 const env = loadEnv();
 
@@ -36,7 +38,10 @@ app.decorate("prisma", prisma);
 const s3 = createS3(env);
 app.decorate("s3", s3);
 
-const { jobs } = createInProcessJobs({ prisma });
+const queues = createQueues(env);
+app.decorate("queues", queues);
+
+const { jobs } = createInProcessJobs({ prisma, queues });
 app.decorate("jobs", jobs);
 app.decorate("env", env);
 
@@ -72,6 +77,8 @@ app.addHook("onRequest", async (req, reply) => {
 await registerRoutes(app);
 
 app.addHook("onClose", async () => {
+  await queues.scene.close();
+  await queues.export.close();
   await prisma.$disconnect();
 });
 

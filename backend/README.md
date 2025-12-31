@@ -2,7 +2,7 @@
 
 ## Dev prerequisites
 - Node.js 20+
-- Docker Desktop (for Postgres/MinIO)
+- Docker Desktop (for Postgres/Redis/MinIO)
 
 ## Start dependencies
 From repo root:
@@ -21,3 +21,8 @@ From `backend/`:
 
 ## Dev auth
 If you don’t send a Bearer token, the server issues an `x-dev-token` response header you can reuse.
+
+## Server-side exports
+- Create an export job: `POST /api/v1/projects/{projectId}/exports`
+- Poll status: `GET /api/v1/projects/{projectId}/exports/{exportId}`
+- Get signed download URLs: `GET /api/v1/projects/{projectId}/exports/{exportId}?signed=1`

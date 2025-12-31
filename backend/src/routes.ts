@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { createUploadUrl } from "./s3.js";
+import { createDownloadUrl, createUploadUrl, parseS3Url } from "./s3.js";
 
 export async function registerRoutes(app: FastifyInstance) {
   app.get("/health", async () => ({ ok: true }));
@@ -258,11 +258,34 @@ export async function registerRoutes(app: FastifyInstance) {
   app.get("/api/v1/projects/:projectId/exports/:exportId", async (req, reply) => {
     const userId = (req.user as any).sub as string;
     const params = z.object({ projectId: z.string(), exportId: z.string() }).parse(req.params);
+    const query = z
+      .object({
+        signed: z
+          .union([z.literal("true"), z.literal("false"), z.literal("1"), z.literal("0")])
+          .optional()
+      })
+      .parse(req.query ?? {});
     const project = await app.prisma.project.findFirst({ where: { id: params.projectId, userId } });
     if (!project) return reply.code(404).send({ error: "not_found" });
 
     const exportJob = await app.prisma.exportJob.findFirst({ where: { id: params.exportId, projectId: project.id } });
     if (!exportJob) return reply.code(404).send({ error: "not_found" });
-    return { export: exportJob };
+
+    const wantsSigned = query.signed === "true" || query.signed === "1";
+    if (!wantsSigned || exportJob.status !== "succeeded") {
+      return { export: exportJob };
+    }
+
+    const downloadUrls: string[] = [];
+    for (const url of exportJob.resultUrls) {
+      const parsed = parseS3Url(url);
+      if (!parsed) continue;
+      if (parsed.bucket !== app.env.S3_BUCKET) continue;
+      downloadUrls.push(
+        await createDownloadUrl({ s3: app.s3, bucket: parsed.bucket, key: parsed.key, expiresInSeconds: 900 })
+      );
+    }
+
+    return { export: exportJob, downloadUrls };
   });
 }
