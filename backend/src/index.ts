@@ -14,24 +14,24 @@ import { createQueues } from "./queue.js";
 const env = loadEnv();
 
 const app = Fastify({
-  logger: {
-    level: env.LOG_LEVEL
-  }
+    logger: {
+        level: env.LOG_LEVEL
+    }
 });
 
 await app.register(cors, {
-  origin: true,
-  exposedHeaders: ["x-dev-token"]
+    origin: true,
+    exposedHeaders: ["x-dev-token"]
 });
 await app.register(jwt, { secret: env.JWT_SECRET });
 
 await app.register(swagger, {
-  openapi: {
-    info: {
-      title: "Designing Application API",
-      version: "0.1.0"
+    openapi: {
+        info: {
+            title: "Designing Application API",
+            version: "0.1.0"
+        }
     }
-  }
 });
 await app.register(swaggerUi, { routePrefix: "/docs" });
 
@@ -49,40 +49,40 @@ app.decorate("jobs", jobs);
 app.decorate("env", env);
 
 app.addHook("onRequest", async (req, reply) => {
-  if (req.url.startsWith("/health") || req.url.startsWith("/docs") || req.url.startsWith("/documentation")) {
-    return;
-  }
-  // Simple dev auth: accept a JWT if provided; otherwise create/assume a default dev user.
-  // Replace with real login/verify in the next iteration.
-  const auth = req.headers.authorization;
-  if (auth?.startsWith("Bearer ")) {
-    try {
-      await req.jwtVerify();
-      return;
-    } catch {
-      // fallthrough
+    if (req.url.startsWith("/health") || req.url.startsWith("/docs") || req.url.startsWith("/documentation")) {
+        return;
     }
-  }
+    // Simple dev auth: accept a JWT if provided; otherwise create/assume a default dev user.
+    // Replace with real login/verify in the next iteration.
+    const auth = req.headers.authorization;
+    if (auth?.startsWith("Bearer ")) {
+        try {
+            await req.jwtVerify();
+            return;
+        } catch {
+            // fallthrough
+        }
+    }
 
-  // Dev fallback: ensure a user exists, then sign a token and attach it.
-  const devEmail = "dev@example.com";
-  const user = await prisma.user.upsert({
-    where: { email: devEmail },
-    update: {},
-    create: { email: devEmail }
-  });
+    // Dev fallback: ensure a user exists, then sign a token and attach it.
+    const devEmail = "dev@example.com";
+    const user = await prisma.user.upsert({
+        where: { email: devEmail },
+        update: {},
+        create: { email: devEmail }
+    });
 
-  const token = app.jwt.sign({ sub: user.id });
-  reply.header("x-dev-token", token);
-  (req as any).user = { sub: user.id };
+    const token = app.jwt.sign({ sub: user.id });
+    reply.header("x-dev-token", token);
+    (req as any).user = { sub: user.id };
 });
 
 await registerRoutes(app);
 
 app.addHook("onClose", async () => {
-  await queues.scene.close();
-  await queues.export.close();
-  await prisma.$disconnect();
+    await queues.scene.close();
+    await queues.export.close();
+    await prisma.$disconnect();
 });
 
 await app.listen({ port: env.PORT, host: env.HOST });

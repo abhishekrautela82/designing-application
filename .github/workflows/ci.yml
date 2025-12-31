@@ -122,5 +122,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: List tracked files
         run: |
-          echo "Tracked files:" 
+          echo "Tracked files:"
           git ls-files
